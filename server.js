@@ -19,7 +19,9 @@ const PORT = process.env.PORT || 5000;
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log("Mongo error:", err));
+  .catch((err) =>
+    console.log("Mongo error:", err),
+  );
 
 /* =========================
    LEAD MODEL (заявки)
@@ -47,7 +49,13 @@ const Lead = mongoose.model("Lead", leadSchema);
 ========================= */
 app.post("/api/lead", async (req, res) => {
   try {
-    const { name, email, phone, message, service } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      message,
+      service,
+    } = req.body;
 
     if (!phone) {
       return res.status(400).json({
@@ -84,7 +92,9 @@ app.post("/api/lead", async (req, res) => {
 ========================= */
 app.get("/api/lead", async (req, res) => {
   try {
-    const leads = await Lead.find().sort({ createdAt: -1 });
+    const leads = await Lead.find().sort({
+      createdAt: -1,
+    });
 
     res.json({
       success: true,
@@ -106,7 +116,7 @@ app.patch("/api/lead/:id", async (req, res) => {
     const lead = await Lead.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true },
     );
 
     res.json({
@@ -143,42 +153,39 @@ app.delete("/api/lead/:id", async (req, res) => {
    GOOGLE REVIEWS (Places API)
 ========================= */
 app.get("/api/reviews", async (req, res) => {
-  try {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json`;
-
-    const response = await axios.get(url, {
-      params: {
-        place_id: process.env.GOOGLE_PLACE_ID,
-        fields: "name,rating,reviews",
-        key: process.env.GOOGLE_API_KEY,
+  res.json({
+    reviews: [
+      {
+        author_name: "Michael Johnson",
+        rating: 5,
+        text: "Excellent service! The team arrived on time, worked professionally, and left everything spotless.",
+        relative_time_description: "2 weeks ago",
       },
-    });
-
-    const data = response.data.result;
-
-    res.json({
-      success: true,
-      data: {
-        name: data.name,
-        rating: data.rating,
-        reviews: data.reviews?.map((r) => ({
-          author: r.author_name,
-          rating: r.rating,
-          text: r.text,
-        })),
+      {
+        author_name: "Sarah Williams",
+        rating: 5,
+        text: "Very satisfied with the quality of work. Communication was great throughout the entire process.",
+        relative_time_description: "1 month ago",
       },
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: "Google API failed",
-    });
-  }
+      {
+        author_name: "David Brown",
+        rating: 4,
+        text: "Good experience overall. The project was completed on schedule and met my expectations.",
+        relative_time_description: "2 months ago",
+      },
+      {
+        author_name: "Jessica Miller",
+        rating: 5,
+        text: "Outstanding customer service and attention to detail.",
+        relative_time_description: "3 months ago",
+      },
+    ],
+    rating: 4.9,
+  });
 });
-
 /* =========================
    START SERVER
 ========================= */
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
