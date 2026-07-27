@@ -183,6 +183,12 @@ app.get("/api/reviews", async (req, res) => {
     rating: 4.9,
   });
 });
+app.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Tree service backend is running",
+  });
+});
 /* =========================
    START SERVER
 ========================= */
