@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import axios from "axios";
 
 dotenv.config();
 
@@ -16,6 +15,7 @@ const PORT = process.env.PORT || 5000;
 /* =========================
    MONGO CONNECT
 ========================= */
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
@@ -24,18 +24,25 @@ mongoose
   );
 
 /* =========================
-   LEAD MODEL (заявки)
+   LEAD MODEL
 ========================= */
+
 const leadSchema = new mongoose.Schema({
   name: String,
+
   email: String,
+
   phone: String,
+
   message: String,
+
   service: String,
+
   status: {
     type: String,
-    default: "new", // new / in_progress / done
+    default: "new",
   },
+
   createdAt: {
     type: Date,
     default: Date.now,
@@ -45,8 +52,9 @@ const leadSchema = new mongoose.Schema({
 const Lead = mongoose.model("Lead", leadSchema);
 
 /* =========================
-   CREATE LEAD (с формы)
+   CREATE LEAD
 ========================= */
+
 app.post("/api/lead", async (req, res) => {
   try {
     const {
@@ -66,9 +74,13 @@ app.post("/api/lead", async (req, res) => {
 
     const lead = new Lead({
       name,
+
       email,
+
       phone,
+
       message,
+
       service,
     });
 
@@ -76,20 +88,24 @@ app.post("/api/lead", async (req, res) => {
 
     res.json({
       success: true,
+
       data: lead,
     });
   } catch (err) {
     console.log(err);
+
     res.status(500).json({
       success: false,
+
       error: "Server error",
     });
   }
 });
 
 /* =========================
-   GET ALL LEADS (АДМИН)
+   GET ALL LEADS
 ========================= */
+
 app.get("/api/lead", async (req, res) => {
   try {
     const leads = await Lead.find().sort({
@@ -98,11 +114,13 @@ app.get("/api/lead", async (req, res) => {
 
     res.json({
       success: true,
+
       data: leads,
     });
   } catch (err) {
     res.status(500).json({
       success: false,
+
       error: "Server error",
     });
   }
@@ -111,21 +129,26 @@ app.get("/api/lead", async (req, res) => {
 /* =========================
    UPDATE LEAD STATUS
 ========================= */
+
 app.patch("/api/lead/:id", async (req, res) => {
   try {
     const lead = await Lead.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true },
+      {
+        new: true,
+      },
     );
 
     res.json({
       success: true,
+
       data: lead,
     });
   } catch (err) {
     res.status(500).json({
       success: false,
+
       error: "Update failed",
     });
   }
@@ -134,6 +157,7 @@ app.patch("/api/lead/:id", async (req, res) => {
 /* =========================
    DELETE LEAD
 ========================= */
+
 app.delete("/api/lead/:id", async (req, res) => {
   try {
     await Lead.findByIdAndDelete(req.params.id);
@@ -144,54 +168,88 @@ app.delete("/api/lead/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
+
       error: "Delete failed",
     });
   }
 });
 
 /* =========================
-   GOOGLE REVIEWS (Places API)
+   REVIEWS
+   DEMO NOW
+   GOOGLE API LATER
 ========================= */
+
 app.get("/api/reviews", async (req, res) => {
+  const reviews = [
+    {
+      author_name: "Michael Johnson",
+
+      rating: 5,
+
+      text: "Excellent tree removal service! The team arrived on time, worked professionally, and left everything spotless.",
+
+      relative_time_description: "2 weeks ago",
+    },
+
+    {
+      author_name: "Sarah Williams",
+
+      rating: 5,
+
+      text: "Very satisfied with the quality of work. Communication was great throughout the entire process.",
+
+      relative_time_description: "1 month ago",
+    },
+
+    {
+      author_name: "David Brown",
+
+      rating: 4,
+
+      text: "Good experience overall. The project was completed on schedule and met my expectations.",
+
+      relative_time_description: "2 months ago",
+    },
+
+    {
+      author_name: "Jessica Miller",
+
+      rating: 5,
+
+      text: "Outstanding customer service and attention to detail.",
+
+      relative_time_description: "3 months ago",
+    },
+  ];
+
   res.json({
-    reviews: [
-      {
-        author_name: "Michael Johnson",
-        rating: 5,
-        text: "Excellent service! The team arrived on time, worked professionally, and left everything spotless.",
-        relative_time_description: "2 weeks ago",
-      },
-      {
-        author_name: "Sarah Williams",
-        rating: 5,
-        text: "Very satisfied with the quality of work. Communication was great throughout the entire process.",
-        relative_time_description: "1 month ago",
-      },
-      {
-        author_name: "David Brown",
-        rating: 4,
-        text: "Good experience overall. The project was completed on schedule and met my expectations.",
-        relative_time_description: "2 months ago",
-      },
-      {
-        author_name: "Jessica Miller",
-        rating: 5,
-        text: "Outstanding customer service and attention to detail.",
-        relative_time_description: "3 months ago",
-      },
-    ],
+    success: true,
+
+    source: "demo",
+
     rating: 4.9,
+
+    reviews,
   });
 });
+
+/* =========================
+   HEALTH CHECK
+========================= */
+
 app.get("/", (req, res) => {
   res.json({
     status: "OK",
+
     message: "Tree service backend is running",
   });
 });
+
 /* =========================
    START SERVER
 ========================= */
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
